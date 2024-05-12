@@ -21,29 +21,95 @@
   <div id="cesiumContainer"></div>
 
   <script type="module">
-    // Your access token can be found at: https://ion.cesium.com/tokens.
-    // This is the default access token from your ion account
+    // Grant CesiumJS access to your ion assets
+    Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIxMzI2ZGM3OC1lNzc0LTQ2NjAtYjk4My0xNTU4ZjBiNjVmYWQiLCJpZCI6MjExMzA0LCJpYXQiOjE3MTQwNTM4Nzh9.9Ukf8VP5V1LxG5J2n94eodXQijyDvWkuSIUNcs1T0Hg";
 
+    // set home view to Lützi before viewer construction
+    var extent = Cesium.Rectangle.fromDegrees(6.42,51.056,6.435,51.064); // Lützi :)
+    Cesium.Camera.DEFAULT_VIEW_RECTANGLE = extent;
+    Cesium.Camera.DEFAULT_VIEW_FACTOR = 0;
 
-    Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIxMzI2ZGM3OC1lNzc0LTQ2NjAtYjk4My0xNTU4ZjBiNjVmYWQiLCJpZCI6MjExMzA0LCJpYXQiOjE3MTQwNTM4Nzh9.9Ukf8VP5V1LxG5J2n94eodXQijyDvWkuSIUNcs1T0Hg';
-
-    // Initialize the Cesium Viewer in the HTML element with the `cesiumContainer` ID.
-    const viewer = new Cesium.Viewer('cesiumContainer', {
-      terrain: Cesium.Terrain.fromWorldTerrain(),
-    });    
-
-    // Fly the camera to San Francisco at the given longitude, latitude, and height.
-    viewer.camera.flyTo({
-      destination: Cesium.Cartesian3.fromDegrees(-122.4175, 37.655, 400),
-      orientation: {
-        heading: Cesium.Math.toRadians(0.0),
-        pitch: Cesium.Math.toRadians(-15.0),
-      }
+    const viewer = new Cesium.Viewer("cesiumContainer", {
+      terrainProvider: await Cesium.CesiumTerrainProvider.fromIonAssetId(
+        1,
+      ),
+      timeline: false, // Tageszeitleiste ausblenden
+      animation: false, // Tageszeit-Animator ausblenden
+      //baseLayerPicker: false
     });
 
-    // Add Cesium OSM Buildings, a global 3D buildings layer.
-    const buildingTileset = await Cesium.createOsmBuildingsAsync();
-    viewer.scene.primitives.add(buildingTileset);   
+    // OBJs immer über Grund rendern
+    viewer.scene.globe.depthTestAgainstTerrain = false;
+
+    // Disable camera collision to allow it to go underground
+    viewer.scene.screenSpaceCameraController.enableCollisionDetection = false;
+
+    // load assets to split screens
+    try {
+      const left = await Cesium.Cesium3DTileset.fromIonAssetId(2553946);
+      viewer.scene.primitives.add(left);
+      left.splitDirection = Cesium.SplitDirection.NONE;
+
+      viewer.zoomTo(left);
+
+      const right = await Cesium.Cesium3DTileset.fromIonAssetId(2553763);
+      viewer.scene.primitives.add(right);
+      right.splitDirection = Cesium.SplitDirection.RIGHT;
+    } catch (error) {
+      console.log(`Error loading tileset: ${error}`);
+    }
+
+    // buttons
+    const resetCameraFunction = function () {
+      const lützi = Cesium.Cesium3DTileset.fromIonAssetId(2553946);
+      viewer.zoomTo(lützi);
+    };
+    Sandcastle.addToolbarButton("zoomTo Lützi", resetCameraFunction);
+    const flyCameraFunction = function () {
+      const lützi = Cesium.Cesium3DTileset.fromIonAssetId(2553946);
+      viewer.flyTo(lützi);
+    };
+    Sandcastle.addToolbarButton("flyTo Lützi", flyCameraFunction);
+
+    // Sync the position of the slider with the split position
+    const slider = document.getElementById("slider");
+    viewer.scene.splitPosition =
+      slider.offsetLeft / slider.parentElement.offsetWidth;
+
+    const handler = new Cesium.ScreenSpaceEventHandler(slider);
+
+    let moveActive = false;
+
+    function move(movement) {
+      if (!moveActive) {
+        return;
+      }
+
+      const relativeOffset = movement.endPosition.x;
+      const splitPosition =
+        (slider.offsetLeft + relativeOffset) /
+        slider.parentElement.offsetWidth;
+      slider.style.left = `${100.0 * splitPosition}%`;
+      viewer.scene.splitPosition = splitPosition;
+    }
+
+    handler.setInputAction(function () {
+      moveActive = true;
+    }, Cesium.ScreenSpaceEventType.LEFT_DOWN);
+    handler.setInputAction(function () {
+      moveActive = true;
+    }, Cesium.ScreenSpaceEventType.PINCH_START);
+
+    handler.setInputAction(move, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+    handler.setInputAction(move, Cesium.ScreenSpaceEventType.PINCH_MOVE);
+
+    handler.setInputAction(function () {
+      moveActive = false;
+    }, Cesium.ScreenSpaceEventType.LEFT_UP);
+    handler.setInputAction(function () {
+      moveActive = false;
+    }, Cesium.ScreenSpaceEventType.PINCH_END);
+      
 
   </script>
 
