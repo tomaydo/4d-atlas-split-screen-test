@@ -14,11 +14,35 @@
 
   <link href="https://cesium.com/downloads/cesiumjs/releases/1.117/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
 
+  <link href="style.css" rel="stylesheet">
+  
+  <style type="text/css">
+    @import url(bucket.css);
+
+    #slider {
+      position: absolute;
+      left: 50%;
+      top: 0px;
+      background-color: #d3d3d3;
+      width: 5px;
+      height: 100%;
+      z-index: 9999;
+    }
+
+    #slider:hover {
+      cursor: ew-resize;
+    }
+  </style>
+
 </head>
 
 <body>
 
-  <div id="cesiumContainer"></div>
+  <div id="cesiumContainer" class="fullSize">
+    <div id="slider"></div>
+  </div>
+  <div id="loadingOverlay"><h1>Loading Lützi ...</h1></div>
+  <div id="toolbar"></div>
 
   <script type="module">
     // Grant CesiumJS access to your ion assets
@@ -37,14 +61,8 @@
       animation: false, // Tageszeit-Animator ausblenden
       //baseLayerPicker: false
     });
+    viewer.scene.globe.depthTestAgainstTerrain = false; // OBJs immer über Grund rendern
 
-    // OBJs immer über Grund rendern
-    viewer.scene.globe.depthTestAgainstTerrain = false;
-
-    // Disable camera collision to allow it to go underground
-    viewer.scene.screenSpaceCameraController.enableCollisionDetection = false;
-
-    // load assets to split screens
     try {
       const left = await Cesium.Cesium3DTileset.fromIonAssetId(2553946);
       viewer.scene.primitives.add(left);
@@ -59,15 +77,15 @@
       console.log(`Error loading tileset: ${error}`);
     }
 
-    // buttons
+    // reset-view buttons
     const resetCameraFunction = function () {
-      const lützi = Cesium.Cesium3DTileset.fromIonAssetId(2553946);
-      viewer.zoomTo(lützi);
+      const luetzi = Cesium.Cesium3DTileset.fromIonAssetId(2553946);
+      viewer.zoomTo(luetzi);
     };
     Sandcastle.addToolbarButton("zoomTo Lützi", resetCameraFunction);
     const flyCameraFunction = function () {
-      const lützi = Cesium.Cesium3DTileset.fromIonAssetId(2553946);
-      viewer.flyTo(lützi);
+      const luetzi = Cesium.Cesium3DTileset.fromIonAssetId(2553946);
+      viewer.flyTo(luetzi);
     };
     Sandcastle.addToolbarButton("flyTo Lützi", flyCameraFunction);
 
@@ -109,6 +127,7 @@
     handler.setInputAction(function () {
       moveActive = false;
     }, Cesium.ScreenSpaceEventType.PINCH_END);
+
       
 
   </script>
