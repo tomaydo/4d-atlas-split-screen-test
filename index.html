@@ -32,6 +32,10 @@
     #slider:hover {
       cursor: ew-resize;
     }
+
+    #zoom-to-luetzi { z-index: 1; position: fixed; top: 5px; left: 5px; }
+    #fly-to-luetzi { z-index: 1; position: fixed; top: 5px; left: 150px; }
+
   </style>
 
 </head>
@@ -43,6 +47,11 @@
   </div>
   <div id="loadingOverlay"><h1>Loading Lützi ...</h1></div>
   <div id="toolbar"></div>
+
+  <button id="zoom-to-luetzi">zoomTo Lützi</button>
+
+  <button id="fly-to-luetzi">flyTo Lützi</button>
+
 
   <script type="module">
     // Grant CesiumJS access to your ion assets
@@ -78,16 +87,19 @@
     }
 
     // reset-view buttons
-    const resetCameraFunction = function () {
+    // STEP 7 CODE
+    // Toggle the tileset's show property when the button is clicked.
+    document.querySelector('#zoom-to-luetzi').onclick = function() {
       const luetzi = Cesium.Cesium3DTileset.fromIonAssetId(2553946);
       viewer.zoomTo(luetzi);
     };
-    Sandcastle.addToolbarButton("zoomTo Lützi", resetCameraFunction);
-    const flyCameraFunction = function () {
+
+    document.querySelector('#fly-to-luetzi').onclick = function() {
       const luetzi = Cesium.Cesium3DTileset.fromIonAssetId(2553946);
       viewer.flyTo(luetzi);
     };
-    Sandcastle.addToolbarButton("flyTo Lützi", flyCameraFunction);
+
+    //Sandcastle.addToolbarButton("flyTo Lützi", flyCameraFunction);
 
     // Sync the position of the slider with the split position
     const slider = document.getElementById("slider");
