@@ -34,7 +34,7 @@
     }
 
     #zoom-to-luetzi { z-index: 1; position: fixed; top: 5px; left: 5px; }
-    #fly-to-luetzi { z-index: 1; position: fixed; top: 5px; left: 150px; }
+    #fly-to-luetzi { z-index: 1; position: fixed; top: 5px; left: 100px; }
 
   </style>
 
@@ -86,9 +86,7 @@
       console.log(`Error loading tileset: ${error}`);
     }
 
-    // reset-view buttons
-    // STEP 7 CODE
-    // Toggle the tileset's show property when the button is clicked.
+    // button functions
     document.querySelector('#zoom-to-luetzi').onclick = function() {
       const luetzi = Cesium.Cesium3DTileset.fromIonAssetId(2553946);
       viewer.zoomTo(luetzi);
