@@ -73,9 +73,9 @@
     viewer.scene.globe.depthTestAgainstTerrain = false; // OBJs immer über Grund rendern
 
     try {
-      const left = await Cesium.Cesium3DTileset.fromIonAssetId(2553946);
+      const left = await Cesium.Cesium3DTileset.fromIonAssetId(2801591);
       viewer.scene.primitives.add(left);
-      left.splitDirection = Cesium.SplitDirection.NONE;
+      left.splitDirection = Cesium.SplitDirection.LEFT;
 
       viewer.zoomTo(left);
 
