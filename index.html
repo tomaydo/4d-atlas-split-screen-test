@@ -85,7 +85,7 @@
       viewer.scene.primitives.add(right);
       right.splitDirection = Cesium.SplitDirection.RIGHT;
 
-      viewer.zoomTo(spLine);
+      viewer.zoomTo(right);
 
     } catch (error) {
       console.log(`Error loading tileset: ${error}`);
@@ -94,12 +94,12 @@
     // button functions
     document.querySelector('#zoom-to-luetzi').onclick = function() {
       const luetzi = Cesium.Cesium3DTileset.fromIonAssetId(2553946);
-      viewer.zoomTo(spLine);
+      viewer.zoomTo(luetzi);
     };
 
     document.querySelector('#fly-to-luetzi').onclick = function() {
       const luetzi = Cesium.Cesium3DTileset.fromIonAssetId(2553946);
-      viewer.flyTo(spLine);
+      viewer.flyTo(luetzi);
     };
 
     //Sandcastle.addToolbarButton("flyTo Lützi", flyCameraFunction);
