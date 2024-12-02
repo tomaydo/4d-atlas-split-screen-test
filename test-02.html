@@ -46,8 +46,21 @@
     <div id="slider"></div>
   </div>
   <div id="loadingOverlay"><h1>Loading...</h1></div>
-  <div id="toolbarSelectLeft"></div>
-  <div id="toolbarSelectRight"></div>
+  
+
+  <select name="toolbarSelectLeft" id="toolbarSelectLeft">
+    <option value="Select ...">Select ...</option>
+    <option value="SEPT 2021">SEPT 2021</option>
+    <option value="APR 2022">APR 2022</option>
+    <option value="JUN 2023">JUN 2023</option>
+  </select>
+
+  <select name="toolbarSelectRight" id="toolbarSelectRight">
+    <option value="Select ...">Select ...</option>
+    <option value="SEPT 2021">SEPT 2021</option>
+    <option value="APR 2022">APR 2022</option>
+    <option value="JUN 2023">JUN 2023</option>
+  </select>
 
 
   <script type="module">
@@ -202,8 +215,8 @@
       return options;
     }
 
-    Sandcastle.addToolbarMenu(createLeftOptions(), "toolbarSelectLeft");
-    Sandcastle.addToolbarMenu(createRightOptions(), "toolbarSelectRight");
+    //Sandcastle.addToolbarMenu(createLeftOptions(), "toolbarSelectLeft");
+    //Sandcastle.addToolbarMenu(createRightOptions(), "toolbarSelectRight");
 
 
 
