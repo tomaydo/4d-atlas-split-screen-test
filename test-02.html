@@ -33,8 +33,8 @@
       cursor: ew-resize;
     }
 
-    #toolbarSelectLeft { z-index: 1; position: fixed; top: 5px; left: 5px; }
-    #toolbarSelectRight { z-index: 1; position: fixed; top: 5px; left: 100px; }
+    #toolbarSelectLeft { z-index: 1; position: fixed; top: 5px; left: 36%; }
+    #toolbarSelectRight { z-index: 1; position: fixed; top: 5px; left: 52%; }
 
   </style>
 
@@ -55,6 +55,7 @@
     Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIxMzI2ZGM3OC1lNzc0LTQ2NjAtYjk4My0xNTU4ZjBiNjVmYWQiLCJpZCI6MjExMzA0LCJpYXQiOjE3MTQwNTM4Nzh9.9Ukf8VP5V1LxG5J2n94eodXQijyDvWkuSIUNcs1T0Hg";
 
     const viewer = new Cesium.Viewer("cesiumContainer", {
+      terrainProvider: await Cesium.CesiumTerrainProvider.fromIonAssetId(1),
       geocoder: false,
       sceneModePicker: false,
       homeButton: false,
@@ -63,28 +64,23 @@
       timeline: false, // Tageszeitleiste ausblenden
       animation: false, // Tageszeit-Animator ausblenden
     });
+    viewer.scene.globe.depthTestAgainstTerrain = false; // OBJs immer über Grund rendern
 
     // Asset Lookup tables ================================================
 
-    // Left half of the screen:
-    // Tilesets produced by the Cesium ion 3D Model Tiler
-    const leftAssetIds = {
+    // Asset IDs
+    const assetIds = {
       "SEPT 2021": 2888406,
       "APR 2022": 2801591,
+      "JUN 2023": 2882527,
     };
 
-    // Right half of the screen:
-    // Tilesets produced by the Cesium ion Reality Tiler
-    const rightAssetIds = {
-      "SEPT 2021": 2888406,
-      "APR 2022": 2801591,
-    };
-
-
+    const luetzi = await Cesium.Cesium3DTileset.fromIonAssetId(2888406);
+    viewer.zoomTo(luetzi);
 
     // List of tileset names for creating options and indexing into the
     // lookup tables above.
-    const tilesetNames = ["SEPT 2021", "APR 2022", "JUN 2023"];
+    const tilesetNames = ["Select ...", "SEPT 2021", "APR 2022", "JUN 2023"];
 
     // Tileset Loading ====================================================
 
@@ -97,12 +93,10 @@
       new Cesium.PrimitiveCollection(),
     );
 
-    // Load a tileset to one half of the screen, returning the tileset
-    async function loadTileset(tilesetName, splitDirection) {
-      const isLeft = splitDirection === Cesium.SplitDirection.LEFT;
+    // Load a tileset to LEFT half of the screen, returning the tileset
+    async function loadLeftTileset(tilesetName) {
 
-      const assetIds = isLeft ? leftAssetIds : rightAssetIds;
-      const collection = isLeft ? leftCollection : rightCollection;
+      const collection = leftCollection;
 
       const assetId = assetIds[tilesetName];
       if (!Cesium.defined(assetId)) {
@@ -110,26 +104,61 @@
         return;
       }
 
-      const side = splitDirection === Cesium.SplitDirection.LEFT ? "left" : "right";
-
       collection.removeAll();
       const tileset = await Cesium.Cesium3DTileset.fromIonAssetId(assetId);
-      tileset.splitDirection = splitDirection;
+      tileset.splitDirection = Cesium.SplitDirection.LEFT;
 
       collection.add(tileset);
+      
+      if (tilesetName === "JUN 2023") {
+        const spLines = await Cesium.Cesium3DTileset.fromIonAssetId(2553946);
+        spLines.splitDirection = Cesium.SplitDirection.LEFT;
+        collection.add(spLines);
+      }
 
       return tileset;
     }
 
-    async function viewTileset(tilesetName, splitDirection) {
-      const tileset = await loadTileset(tilesetName, splitDirection);
-      viewer.zoomTo(tileset);
+    // Load a tileset to RIGHT half of the screen, returning the tileset
+    async function loadRightTileset(tilesetName) {
+
+      const collection = rightCollection;
+
+      const assetId = assetIds[tilesetName];
+      if (!Cesium.defined(assetId)) {
+        collection.removeAll();
+        return;
+      }
+
+      collection.removeAll();
+      const tileset = await Cesium.Cesium3DTileset.fromIonAssetId(assetId);
+      tileset.splitDirection = Cesium.SplitDirection.RIGHT;
+
+      collection.add(tileset);
+      
+      if (tilesetName === "JUN 2023") {
+        const spLines = await Cesium.Cesium3DTileset.fromIonAssetId(2553946);
+        spLines.splitDirection = Cesium.SplitDirection.RIGHT;
+        collection.add(spLines);
+      }
+
+      return tileset;
     }
 
-    async function viewTilesets(tilesetName) {
+    async function viewLeftTileset(tilesetName, splitDirection) {
+      const tileset = await loadLeftTileset(tilesetName, splitDirection);
+      //viewer.zoomTo(tileset);
+    }
+
+    async function viewRightTileset(tilesetName, splitDirection) {
+      const tileset = await loadRightTileset(tilesetName, splitDirection);
+      //viewer.zoomTo(tileset);
+    }
+
+    async function viewBothTilesets(tilesetName) {
       // Load the tilesets simultaneously
-      viewTileset(tilesetName, Cesium.SplitDirection.LEFT);
-      viewTileset(tilesetName, Cesium.SplitDirection.RIGHT);
+      viewLeftTileset(tilesetName, Cesium.SplitDirection.LEFT);
+      viewRightTileset(tilesetName, Cesium.SplitDirection.RIGHT);
     }
 
 
@@ -139,27 +168,42 @@
     // Tileset dropdown ---------------------------------------------------
 
     // The first tileset in the dropdown will automatically be selected.
-    let selectedTilesetName = tilesetNames[0];
+    let selectedTilesetLeft = tilesetNames[1];
 
-    function createOption(name) {
+    function createLeftOption(name) {
       return {
         text: name,
         onselect: function () {
-          selectedTilesetName = name;
-          viewTilesets(name).catch(console.error);
+          selectedTilesetLeft = name;
+          viewLeftTileset(name, Cesium.SplitDirection.LEFT).catch(console.error);
         },
       };
     }
 
-    function createOptions() {
-      const options = tilesetNames.map(createOption);
+    function createLeftOptions() {
+      const options = tilesetNames.map(createLeftOption);
       return options;
     }
 
-    Sandcastle.addToolbarMenu(createOptions(), "toolbarSelectLeft");
-    Sandcastle.addToolbarMenu(createOptions(), "toolbarSelectRight");
+    let selectedTilesetRight = tilesetNames[1];
 
+    function createRightOption(name) {
+      return {
+        text: name,
+        onselect: function () {
+          selectedTilesetRight = name;
+          viewRightTileset(name, Cesium.SplitDirection.RIGHT).catch(console.error);
+        },
+      };
+    }
 
+    function createRightOptions() {
+      const options = tilesetNames.map(createRightOption);
+      return options;
+    }
+
+    Sandcastle.addToolbarMenu(createLeftOptions(), "toolbarSelectLeft");
+    Sandcastle.addToolbarMenu(createRightOptions(), "toolbarSelectRight");
 
 
 
@@ -203,6 +247,8 @@
     handler.setInputAction(function () {
       moveActive = false;
     }, Cesium.ScreenSpaceEventType.PINCH_END);
+
+
 
 
   </script>
