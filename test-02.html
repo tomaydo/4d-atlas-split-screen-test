@@ -23,7 +23,7 @@
       position: absolute;
       left: 50%;
       top: 0px;
-      background-color: #d3d3d300;
+      background-color: #d3d3d37e;
       width: 3px;
       height: 100%;
       z-index: 9999;
@@ -49,15 +49,13 @@
   
 
   <select name="toolbarSelectLeft" id="toolbarSelectLeft">
-    <option value="Select ...">Select ...</option>
-    <option value="SEPT 2021">SEPT 2021</option>
+    <option value="SEP 2021">SEP 2021</option>
     <option value="APR 2022">APR 2022</option>
     <option value="JUN 2023">JUN 2023</option>
   </select>
 
   <select name="toolbarSelectRight" id="toolbarSelectRight">
-    <option value="Select ...">Select ...</option>
-    <option value="SEPT 2021">SEPT 2021</option>
+    <option value="SEP 2021">SEP 2021</option>
     <option value="APR 2022">APR 2022</option>
     <option value="JUN 2023">JUN 2023</option>
   </select>
@@ -83,7 +81,7 @@
 
     // Asset IDs
     const assetIds = {
-      "SEPT 2021": 2888406,
+      "SEP 2021": 2888406,
       "APR 2022": 2801591,
       "JUN 2023": 2882527,
     };
@@ -93,7 +91,7 @@
 
     // List of tileset names for creating options and indexing into the
     // lookup tables above.
-    const tilesetNames = ["Select ...", "SEPT 2021", "APR 2022", "JUN 2023"];
+    const tilesetNames = ["SEP 2021", "APR 2022", "JUN 2023"];
 
     // Tileset Loading ====================================================
 
@@ -149,6 +147,7 @@
 
       collection.add(tileset);
       
+      // also load lines asset for JUN 2023 scene
       if (tilesetName === "JUN 2023") {
         const spLines = await Cesium.Cesium3DTileset.fromIonAssetId(2553946);
         spLines.splitDirection = Cesium.SplitDirection.RIGHT;
@@ -180,43 +179,33 @@
 
     // Tileset dropdown ---------------------------------------------------
 
-    // The first tileset in the dropdown will automatically be selected.
-    let selectedTilesetLeft = tilesetNames[1];
+    // menu functions
+    document.querySelector('#toolbarSelectLeft').onchange = function() {
+      leftFunction();
+    };
+    document.querySelector('#toolbarSelectRight').onchange = function() {
+      rightFunction();
+    };
 
-    function createLeftOption(name) {
-      return {
-        text: name,
-        onselect: function () {
-          selectedTilesetLeft = name;
-          viewLeftTileset(name, Cesium.SplitDirection.LEFT).catch(console.error);
-        },
-      };
+
+    async function leftFunction() {
+      let x = document.getElementById("toolbarSelectLeft").value;
+      viewLeftTileset(x, Cesium.SplitDirection.LEFT).catch(console.error);
     }
 
-    function createLeftOptions() {
-      const options = tilesetNames.map(createLeftOption);
-      return options;
+    async function rightFunction() {
+      let x = document.getElementById("toolbarSelectRight").value;
+      viewRightTileset(x, Cesium.SplitDirection.RIGHT).catch(console.error);
     }
 
-    let selectedTilesetRight = tilesetNames[1];
-
-    function createRightOption(name) {
-      return {
-        text: name,
-        onselect: function () {
-          selectedTilesetRight = name;
-          viewRightTileset(name, Cesium.SplitDirection.RIGHT).catch(console.error);
-        },
-      };
-    }
-
-    function createRightOptions() {
-      const options = tilesetNames.map(createRightOption);
-      return options;
-    }
-
-    //Sandcastle.addToolbarMenu(createLeftOptions(), "toolbarSelectLeft");
-    //Sandcastle.addToolbarMenu(createRightOptions(), "toolbarSelectRight");
+    // load default selections
+    const leftDefault = "SEP 2021";
+    document.querySelector('#toolbarSelectLeft').value = leftDefault;
+    viewLeftTileset(leftDefault, Cesium.SplitDirection.LEFT).catch(console.error);
+    
+    const rightDefault = "APR 2022";
+    document.querySelector('#toolbarSelectRight').value = rightDefault;
+    viewRightTileset(rightDefault, Cesium.SplitDirection.RIGHT).catch(console.error);
 
 
 
