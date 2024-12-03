@@ -64,14 +64,19 @@
   <script type="module">
     // Grant CesiumJS access to your ion assets
     Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIxMzI2ZGM3OC1lNzc0LTQ2NjAtYjk4My0xNTU4ZjBiNjVmYWQiLCJpZCI6MjExMzA0LCJpYXQiOjE3MTQwNTM4Nzh9.9Ukf8VP5V1LxG5J2n94eodXQijyDvWkuSIUNcs1T0Hg";
-
+    
+    // set home view to Lützi before viewer construction
+    var extent = Cesium.Rectangle.fromDegrees(6.42,51.056,6.435,51.064); // Lützi :)
+    Cesium.Camera.DEFAULT_VIEW_RECTANGLE = extent;
+    Cesium.Camera.DEFAULT_VIEW_FACTOR = 0;
+    
     const viewer = new Cesium.Viewer("cesiumContainer", {
       terrainProvider: await Cesium.CesiumTerrainProvider.fromIonAssetId(1),
-      geocoder: false,
+      //geocoder: false,
       sceneModePicker: false,
-      homeButton: false,
-      navigationHelpButton: false,
-      baseLayerPicker: false,
+      //homeButton: false,
+      //navigationHelpButton: false,
+      //baseLayerPicker: false,
       timeline: false, // Tageszeitleiste ausblenden
       animation: false, // Tageszeit-Animator ausblenden
     });
