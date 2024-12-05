@@ -58,14 +58,12 @@
     <option value="SEP 2021">SEP 2021</option>
     <option value="APR 2022">APR 2022</option>
     <option value="JUN 2023">JUN 2023</option>
-    <option value="Paper Craft">Paper Craft</option>
   </select>
 
   <select name="toolbarSelectRight" id="toolbarSelectRight">
     <option value="SEP 2021">SEP 2021</option>
     <option value="APR 2022">APR 2022</option>
     <option value="JUN 2023">JUN 2023</option>
-    <option value="Paper Craft">Paper Craft</option>
   </select>
 
 
@@ -97,7 +95,6 @@
       "SEP 2021": 2888406,
       "APR 2022": 2801591,
       "JUN 2023": 2882527,
-      "Paper Craft": 2904714
     };
 
     const luetzi = await Cesium.Cesium3DTileset.fromIonAssetId(2888406);
@@ -105,7 +102,7 @@
 
     // List of tileset names for creating options and indexing into the
     // lookup tables above.
-    const tilesetNames = ["SEP 2021", "APR 2022", "JUN 2023", "Paper Craft"];
+    const tilesetNames = ["SEP 2021", "APR 2022", "JUN 2023"];
 
     // Tileset Loading ====================================================
 
@@ -115,6 +112,9 @@
       new Cesium.PrimitiveCollection(),
     );
     const rightCollection = viewer.scene.primitives.add(
+      new Cesium.PrimitiveCollection(),
+    );
+    const bothCollection = viewer.scene.primitives.add(
       new Cesium.PrimitiveCollection(),
     );
 
@@ -139,13 +139,6 @@
         const spLines = await Cesium.Cesium3DTileset.fromIonAssetId(2553946);
         spLines.splitDirection = Cesium.SplitDirection.LEFT;
         collection.add(spLines);
-      }
-
-      // also load dark lines asset for Paper Craft scene
-      if (tilesetName === "Paper Craft") {
-        const spLines_blue = await Cesium.Cesium3DTileset.fromIonAssetId(2904789);
-        spLines_blue.splitDirection = Cesium.SplitDirection.LEFT;
-        collection.add(spLines_blue);
       }
 
       return tileset;
@@ -175,14 +168,27 @@
         collection.add(spLines);
       }
 
-      // also load dark lines asset for Paper Craft scene
-      if (tilesetName === "Paper Craft") {
-        const spLines_blue = await Cesium.Cesium3DTileset.fromIonAssetId(2904789);
-        spLines_blue.splitDirection = Cesium.SplitDirection.RIGHT;
-        collection.add(spLines_blue);
-      }
-
       return tileset;
+    }
+
+    // Load tilesets to BOTH halfs of the screen, returning the tileset
+    async function loadFullscreenTilesets() {
+
+      const collection = bothCollection;
+
+      collection.removeAll();
+
+      // Load FRONT faces (2898779, no Material: 2898782)
+      const tileset1 = await Cesium.Cesium3DTileset.fromIonAssetId(2898779);
+      //tileset.splitDirection = Cesium.SplitDirection.RIGHT;
+      collection.add(tileset1);
+
+      // Load BACK faces (2898778, no Material: 2898780)
+      const tileset2 = await Cesium.Cesium3DTileset.fromIonAssetId(2898778);
+      //tileset.splitDirection = Cesium.SplitDirection.RIGHT;
+      collection.add(tileset2);
+
+      return tileset1;
     }
 
     async function viewLeftTileset(tilesetName, splitDirection) {
@@ -292,6 +298,8 @@
     document.querySelector('#toolbarSelectRight').value = rightDefault;
     viewRightTileset(rightDefault, Cesium.SplitDirection.RIGHT).catch(console.error);
 
+    loadFullscreenTilesets();
+    
     await startView();
 
 
